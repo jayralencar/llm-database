@@ -2,13 +2,20 @@ import openai
 from argparse import ArgumentParser
 from tools.QueryStudents import QueryStudents
 from tools.QueryCronograma import QueryCronograma
+from tools.QueryCursoVagas import QueryCursoVagas
+from tools.QueryCursoValores import QueryCursoValores
 
 class LLMDatase():
     def __init__(self, **args) -> None:
         self.args = args
         openai.api_key = args["openai_key"]
         self.database_path = args["database_path"]
-        self.functions = [QueryStudents.openai_schema,QueryCronograma.openai_schema]
+        self.functions = [
+            # QueryStudents.openai_schema,
+            # QueryCronograma.openai_schema,
+            QueryCursoVagas.openai_schema,
+            QueryCursoValores.openai_schema
+        ]
     
     def call_model(self, messages):
         response = openai.ChatCompletion.create(
@@ -22,7 +29,8 @@ class LLMDatase():
     def run(self, user_question):
         instruction = """You are an agent that has access to a database and can perform queries before answering the user's question.
 
-You have access to a SQLite database. You can use the SQLite language to query the database. Use pattern matching to find the answer to the user's question."""
+You have access to a SQLite database. You can use the SQLite language to query the database. Use pattern matching to find the answer to the user's question.
+Use other string functions in the query to find the answer to the user's question. For example, you can use the `lower()`. You can also use the `LIKE` operator to perform pattern matching."""
 
         messages = [
             {"role":"system","content":instruction},
